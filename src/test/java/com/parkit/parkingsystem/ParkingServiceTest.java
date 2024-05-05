@@ -16,6 +16,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Date;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,9 +55,15 @@ public class ParkingServiceTest {
     }
 
     @Test
-    public void processExitingVehicleTest(){
+    public void processExitingVehicleTest() throws ClassNotFoundException{
         parkingService.processExitingVehicle();
         verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
+        verify(ticketDAO,times(1)).getNbTicket(anyString());//added
+    }
+    @Test
+    public void testProcessIncomingVehicle(){
+        parkingService.processIncomingVehicle();
+        verify(parkingSpotDAO).updateParking(any(ParkingSpot.class));
     }
 
 }

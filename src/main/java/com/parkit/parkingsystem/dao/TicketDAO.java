@@ -36,8 +36,8 @@ public class TicketDAO {
             logger.error("Error fetching next available slot",ex);
         }finally {
             dataBaseConfig.closeConnection(con);
-            return false;
         }
+        return false;
     }
 
     public Ticket getTicket(String vehicleRegNumber) {
@@ -65,8 +65,8 @@ public class TicketDAO {
             logger.error("Error fetching next available slot",ex);
         }finally {
             dataBaseConfig.closeConnection(con);
-            return ticket;
         }
+        return ticket;
     }
 
     public boolean updateTicket(Ticket ticket) {
@@ -85,5 +85,24 @@ public class TicketDAO {
             dataBaseConfig.closeConnection(con);
         }
         return false;
+    }
+    public int getNbTicket(String vehicleRegNumber)throws ClassNotFoundException{
+        int res=0;
+        Connection con = null;
+        try {
+            con=dataBaseConfig.getConnection();
+            PreparedStatement ps=con.prepareStatement(DBConstants.COUNT_TICKETS);
+            ps.setString(1, vehicleRegNumber);
+            ResultSet rs=ps.executeQuery();
+            res=rs.getInt(1);
+            dataBaseConfig.closeResultSet(rs);
+            dataBaseConfig.closePreparedStatement(ps);
+            dataBaseConfig.closeConnection(con);
+        } catch (Exception e) {
+            logger.error("Error saving ticket info",e);
+        }finally{
+            dataBaseConfig.closeConnection(con);
+        }
+        return res;
     }
 }
