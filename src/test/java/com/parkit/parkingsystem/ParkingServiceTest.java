@@ -7,6 +7,7 @@ import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,14 +38,7 @@ public class ParkingServiceTest {
         try {
             when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
 
-            ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR,false);
-            Ticket ticket = new Ticket();
-            ticket.setInTime(new Date(System.currentTimeMillis() - (60*60*1000)));
-            ticket.setParkingSpot(parkingSpot);
-            ticket.setVehicleRegNumber("ABCDEF");
-            when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
-            when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
-
+            
             when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
 
             parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
@@ -56,14 +50,44 @@ public class ParkingServiceTest {
 
     @Test
     public void processExitingVehicleTest() throws ClassNotFoundException{
+        Ticket ticket = new Ticket();
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR,false);
+        ticket.setInTime(new Date(System.currentTimeMillis() - (60*60*1000)));
+        ticket.setParkingSpot(parkingSpot);
+        ticket.setVehicleRegNumber("ABCDEF");
+        when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
+        when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
         parkingService.processExitingVehicle();
-        verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
+        verify(parkingSpotDAO, times(1)).updateParking(any(ParkingSpot.class));
         verify(ticketDAO,times(1)).getNbTicket(anyString());//added
     }
     @Test
-    public void testProcessIncomingVehicle(){
+    public void testProcessIncomingVehicle() throws ClassNotFoundException{
+        when(inputReaderUtil.readSelection()).thenReturn(1);
+        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
+        when(ticketDAO.getNbTicket(anyString())).thenReturn(2);
         parkingService.processIncomingVehicle();
         verify(parkingSpotDAO).updateParking(any(ParkingSpot.class));
     }
+    @Test
+    public void processExitingVehicleTestUnableUpdate() throws ClassNotFoundException{
+        
+        when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(false);
+        parkingService.processExitingVehicle();
+        //verify().processExitingVehicle();
+    }
+    @Test
+    public void testGetNextParkingNumberIfAvailable() throws ClassNotFoundException{
+
+    }
+    @Test
+    public void testGetNextParkingNumberIfAvailableParkingNumberNotFound() throws ClassNotFoundException{
+
+    }
+    @Test
+    public void testGetNextParkingNumberIfAvailableParkingNumberWrongArgument() throws ClassNotFoundException{
+
+    }
+    
 
 }

@@ -11,8 +11,10 @@ public class InputReaderUtil {
     private static final Logger logger = LogManager.getLogger("InputReaderUtil");
 
     public int readSelection() {
+        
         try {
             int input = Integer.parseInt(scan.nextLine());
+            System.out.println(input);
             return input;
         }catch(Exception e){
             logger.error("Error while reading user input from Shell", e);
