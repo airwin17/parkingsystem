@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 public class App {
     private static final Logger logger = LogManager.getLogger("App");
     public static void main(String args[]){
+        args[0]="-Djavax.net.debug=all";
         logger.info("Initializing Parking System");
         InteractiveShell.loadInterface();
     }

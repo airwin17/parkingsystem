@@ -39,7 +39,8 @@ public class FareCalculatorService {
         calculateFare(ticket);
         if(discount){
             double currentPrice=ticket.getPrice();
-            ticket.setPrice(currentPrice*95/100);
+            double savedMoney=currentPrice*5/100;
+            ticket.setPrice(currentPrice-savedMoney);
         }
     }
 

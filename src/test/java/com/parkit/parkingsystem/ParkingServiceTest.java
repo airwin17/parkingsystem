@@ -12,11 +12,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Date;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -36,11 +36,6 @@ public class ParkingServiceTest {
     @BeforeEach
     private void setUpPerTest() {
         try {
-            when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
-
-            
-            when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
-
             parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         } catch (Exception e) {
             e.printStackTrace();
@@ -49,7 +44,9 @@ public class ParkingServiceTest {
     }
 
     @Test
-    public void processExitingVehicleTest() throws ClassNotFoundException{
+    public void processExitingVehicleTest() throws Exception{
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
+        when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
         Ticket ticket = new Ticket();
         ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR,false);
         ticket.setInTime(new Date(System.currentTimeMillis() - (60*60*1000)));
@@ -62,7 +59,9 @@ public class ParkingServiceTest {
         verify(ticketDAO,times(1)).getNbTicket(anyString());//added
     }
     @Test
-    public void testProcessIncomingVehicle() throws ClassNotFoundException{
+    public void testProcessIncomingVehicle() throws Exception{
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
+        when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
         when(inputReaderUtil.readSelection()).thenReturn(1);
         when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
         when(ticketDAO.getNbTicket(anyString())).thenReturn(2);
@@ -70,23 +69,34 @@ public class ParkingServiceTest {
         verify(parkingSpotDAO).updateParking(any(ParkingSpot.class));
     }
     @Test
-    public void processExitingVehicleTestUnableUpdate() throws ClassNotFoundException{
-        
+    public void processExitingVehicleTestUnableUpdate() throws Exception{
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
+        Ticket ticket = new Ticket();
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR,false);
+        ticket.setInTime(new Date(System.currentTimeMillis() - (60*60*1000)));
+        ticket.setParkingSpot(parkingSpot);
+        ticket.setVehicleRegNumber("ABCDEF");
+        when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
         when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(false);
         parkingService.processExitingVehicle();
-        //verify().processExitingVehicle();
+        verify(ticketDAO).getNbTicket(anyString());
     }
     @Test
     public void testGetNextParkingNumberIfAvailable() throws ClassNotFoundException{
+        ParkingSpot parkingSpot=new ParkingSpot(1,ParkingType.CAR, true);
+        when(inputReaderUtil.readSelection()).thenReturn(1);
+        when(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)).thenReturn(1);
+        assertEquals(parkingSpot, parkingService.getNextParkingNumberIfAvailable());
 
     }
     @Test
     public void testGetNextParkingNumberIfAvailableParkingNumberNotFound() throws ClassNotFoundException{
-
+        assertEquals(null, parkingService.getNextParkingNumberIfAvailable());
     }
     @Test
     public void testGetNextParkingNumberIfAvailableParkingNumberWrongArgument() throws ClassNotFoundException{
-
+        when(inputReaderUtil.readSelection()).thenReturn(3);
+        assertEquals(null, parkingService.getNextParkingNumberIfAvailable());
     }
     
 
